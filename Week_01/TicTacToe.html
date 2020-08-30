@@ -1,0 +1,172 @@
+<body class="main-container">
+</body>
+
+<script>
+  const valueType = {
+    1: '⭕️',
+    2: '❌',
+  };
+  let pattern = [
+    0, 0, 0,
+    0, 0, 0,
+    0, 0, 0,
+  ]
+  let cellValue = 1;
+  pattern.forEach((item, i) => {
+    const cell = document.createElement('div');
+    cell.classList.add('cell');
+    cell.innerText = valueType[item] || '';
+    cell.addEventListener('click', () => {
+      if (cell.innerText) {
+        return;
+      }
+      pattern[i] = cellValue;
+      cell.innerText = valueType[cellValue];
+      cellValue = 3 - cellValue;
+      const winner = check(pattern);
+      if (winner) {
+        setTimeout(() => {
+          alert(`${winner} is win`);
+          reset();
+        }, 0);
+        return;
+      }
+
+      // const next = willWin(pattern, cellValue);
+      // if (next) {
+      //   console.log(`${next.winner} will win`);
+      // }
+
+      // 用户走完一步，如果还没有赢，则电脑走一步
+      computerMove();
+
+      // const { index, result } = bestChoice(pattern, cellValue);
+      // console.log(valueType[cellValue], ' best choice: ', index, 'result: ', result);
+    });
+    document.body.append(cell);
+  });
+
+  function computerMove() {
+    const { index, result } = bestChoice(pattern, cellValue);
+    if (typeof index !== 'number') {
+      console.log('平局');
+      return;
+    }
+    pattern[index] = cellValue;
+    document.getElementsByTagName('div')[index].innerText = valueType[cellValue];
+    cellValue = 3 - cellValue;
+    const winner = check(pattern);
+    if (winner) {
+      setTimeout(() => {
+        alert(`${winner} is win`);
+        reset();
+      }, 0);
+      return;
+    }
+  }
+
+  function reset() {
+    pattern = [
+      0, 0, 0,
+      0, 0, 0,
+      0, 0, 0,
+    ]
+    const cellList = document.getElementsByTagName('div');
+    for (let i = 0; i < cellList.length; i++) {
+      cellList[i].innerText = '';
+    }
+  }
+
+  function check(pattern) {
+    // 左对角
+    if (pattern[0] === pattern[4] && pattern[0] === pattern[8]) {
+      return valueType[pattern[0]];
+    }
+    // 右对角
+    if (pattern[2] === pattern[4] && pattern[2] === pattern[6]) {
+      return valueType[pattern[2]];
+    }
+    for (let i = 0; i < 3; i++) {
+      // 行
+      if (pattern[i * 3] === pattern[i * 3 + 1] && pattern[i * 3] === pattern[i * 3 + 2]) {
+        return valueType[pattern[i * 3]];
+      }
+      // 列
+      if (pattern[i] === pattern[i + 3] && pattern[i] ===  pattern[i + 6]) {
+        return valueType[pattern[i]];
+      }
+    }
+    return null;
+  }
+
+  function willWin(pattern, cellValue) {
+    for (let i = 0; i < pattern.length; i++) {
+      const cell = pattern[i];
+      if (!cell) {
+        const temp = [...pattern];
+        temp[i] = cellValue;
+        const winner = check(temp);
+        if (winner) {
+          return {
+            winner,
+            index: i,
+          };
+        }
+      }
+    }
+    return null;
+  }
+
+  function bestChoice(pattern, cellValue) {
+    const next = willWin(pattern, cellValue);
+    if (next) {
+      return {
+        index: next.index,
+        result: 1,
+      };
+    }
+    let result = -2;
+    let index;
+    for (let i = 0; i < pattern.length; i++) {
+      const cell = pattern[i];
+      if (!cell) {
+        const temp = [...pattern];
+        temp[i] = cellValue;
+        const { result: r } = bestChoice(temp, 3 - cellValue);
+        // 找到一个未落子的位置，尝试落子后计算对方的结果，如果该位置能找到对方最差的结果，即该位置为我方最好的选择
+        if (-r > result) {
+          result = -r;
+          index = i;
+        }
+        if (-r === 1) {
+          break;
+        }
+      }
+    }
+    return {
+      index,
+      result: typeof(index) === 'number' ? result : 0, // 用typeof避免index为0时判断错误
+    }
+  }
+</script>
+
+<style>
+  .main-container {
+    display: flex;
+    height: 100%;
+    width: 300px;
+    margin: auto;
+    align-items: center;
+    align-content: center;
+    flex-wrap: wrap;
+  }
+  .cell {
+    box-sizing: border-box;
+    width: 100px;
+    height: 100px;
+    line-height: 100px;
+    font-size: 50px;
+    border: 2px solid #bbb;
+    text-align: center;
+  }
+</style>

@@ -1,0 +1,44 @@
+<!-- 红绿灯 -->
+<style>
+  .light {
+    background: #bbb;
+    display: inline-block;
+    margin: 30px;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+  }
+  .red {
+    background: red;
+  }
+  .green {
+    background: green;
+  }
+  .yellow {
+    background: yellow;
+  }
+</style>
+
+<div id="red" class="light"></div>
+<div id="yellow" class="light"></div>
+<div id="green" class="light"></div>
+
+<script>
+  function showLight(color, time) {
+    return new Promise(reslove => {
+      document.getElementById(color).classList.add(color);
+      setTimeout(() => {
+        document.getElementById(color).classList.remove(color);
+        reslove();
+      }, time);
+    })
+  }
+  async function loop() {
+    while (true) {
+      await showLight('red', 5000);
+      await showLight('yellow', 2000);
+      await showLight('green', 5000);
+    }
+  }
+  loop();
+</script>
