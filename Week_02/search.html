@@ -1,0 +1,160 @@
+<div id="container">
+</div>
+<button onclick="save()">保存</button>
+
+<script>
+  const container = document.getElementById('container');
+  const map = localStorage['map'] ? JSON.parse(localStorage['map']) : new Array(10000).fill(0);
+  for (let i = 0; i < 100; i++) {
+    for (let j = 0; j < 100; j++) {
+      const cell = document.createElement('div');
+      cell.classList.add('cell');
+      if (map[i * 100 + j]) {
+        cell.style.background = '#000';
+      }
+      cell.addEventListener('mousemove', () => {
+        if (mouseDown) {
+          if (clear) {
+            cell.style.background = '';
+            map[i * 100 + j] = 0;
+          } else {
+            cell.style.background = '#000';
+            map[i * 100 + j] = 1;
+          }
+        }
+      });
+      container.append(cell);
+    }
+  }
+  let mouseDown = false;
+  let clear = false;
+  document.addEventListener('mousedown', e => {
+    mouseDown = true;
+    clear = e.which === 3;
+  });
+  document.addEventListener('mouseup', () => {
+    mouseDown = false;
+  });
+  document.addEventListener('contextmenu',(e) => {e.preventDefault()});
+
+  function save() {
+    localStorage.setItem('map', JSON.stringify(map));
+  }
+
+  function sleep(time) {
+    return new Promise(reslove => {
+      setTimeout(() => {
+        reslove();
+      }, time)
+    })
+  }
+
+
+  class Sorted {
+    constructor(data, compare) {
+      this.data = data.slice();
+      this.compare = compare || ((a, b) => {return a - b});
+    }
+
+    take() {
+      if (!this.data.length) {
+        return;
+      }
+      let min = this.data[0];
+      let minIndex = 0;
+
+      for (let i = 1; i < this.data.length; i++) {
+        if (this.compare(this.data[i], min) < 0) {
+          min = this.data[i];
+          minIndex = i;
+        }
+      }
+      this.data[minIndex] = this.data[this.data.length - 1];
+      this.data.pop();
+      return min;
+    }
+
+    give(item) {
+      this.data.push(item);
+    }
+
+    get length() {
+      return this.data.length;
+    }
+  }
+  
+  async function findPath(map, start, end) {
+    const table = Object.create(map);
+    const queue = new Sorted([start], (a, b) => {
+      return distance(a) - distance(b);
+    });
+
+    function distance(point) {
+      return Math.pow(point[0] - end[0], 2) + Math.pow(point[1] - end[1], 2);
+    }
+
+    async function insert(x, y, pre) {
+      if (x < 0 || y < 0 || x >= 100 || y >= 100) {
+        // 超出地图范围
+        return;
+      }
+      if (table[y * 100 + x]) {
+        // 有墙或已经搜索过
+        return;
+      }
+      // map[y * 100 + x] = 2;
+      table[y * 100 + x] = pre;
+      container.children[y * 100 + x].style.background = 'lightgreen';
+      queue.give([x, y]);
+      await sleep(1);
+    };
+
+    while (queue.length) {
+      let [x, y] = queue.take(); // 取出最近的一个
+      // console.log(x, y);
+      if (x === end[0] && y === end[1]) {
+        let path = [];
+        while (x !== start[0] || y !== start[1]) {
+          // path.push(map[y * 100 + x]);
+          path.push(y * 100 + x);
+          [x, y] = table[y * 100 + x];
+          container.children[y * 100 + x].style.background = 'purple';
+          await sleep(10);
+        }
+        return path;
+      }
+      await insert(x, y - 1, [x, y]);
+      await insert(x, y + 1, [x, y]);
+      await insert(x - 1, y, [x, y]);
+      await insert(x + 1, y, [x, y]);
+      await insert(x - 1, y - 1, [x, y]);
+      await insert(x - 1, y + 1, [x, y]);
+      await insert(x + 1, y - 1, [x, y]);
+      await insert(x + 1, y + 1, [x, y]);
+    }
+    return null;
+  }
+</script>
+
+<style>
+  body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  #container {
+    display: flex;
+    width: 600px;
+    margin: auto;
+    align-items: center;
+    align-content: center;
+    flex-wrap: wrap;
+  }
+  .cell {
+    width: 6px;
+    height: 6px;
+    background: #bbb;
+    border: solid 1px #fff;
+    box-sizing: border-box;
+  }
+</style>
