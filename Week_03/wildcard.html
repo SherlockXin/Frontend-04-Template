@@ -1,0 +1,59 @@
+<script>
+  function find(pattern, source) {
+    if (pattern.length === 0) {
+      return true;
+    }
+    // 去掉通配符后如果pattern长度大于source长度或source长度为0，返回false
+    if (pattern.replace(/\*/g, '').replace(/\?/g, '').length > source.length || source.length === 0) {
+      return false;
+    }
+    let startCount = 0;
+    for (let i = 0; i < source.length; i++) {
+      if (pattern[i] === '*') {
+        startCount += 1;
+      }
+    }
+    // 没有*
+    if (startCount === 0) {
+      for (let i = 0; i < pattern.length; i++) {
+        if (pattern[i] !== source[i] && pattern[i] !== '?') {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    let i = 0;
+    let lastIndex = 0;
+    // 处理第一个*前的字符串
+    for (i = 0; pattern[i] !== '*'; i++) {
+      if (pattern[i] !== source[i] && pattern[i] !== '?') {
+        return false;
+      }
+    }
+    lastIndex = i;
+
+    for (let p = 0; p < startCount - 1; p++) {
+      i++;
+      let subPattern = '';
+      // 获取下一个*前的子串
+      while (pattern[i] !== '*') {
+        subPattern += pattern[i];
+        i++;
+      }
+      // 所有问号替换成正则，sS表示所有字符集
+      const reg = new RegExp(subPattern.replace(/\?/g, '[\\s\\S]'), 'g');
+      // 从上一次处理完的位置开始匹配
+      reg.lastIndex = lastIndex;
+      console.log(reg.exec(source));
+      lastIndex = reg.lastIndex;
+    }
+    // 处理最后一个*后面的字符串，从pattern最后向前倒过来匹配
+    for (let j = 1; j <= source.length - lastIndex && pattern[pattern.length - j] !== '*'; j++) {
+      if (pattern[pattern.length - j] !== source[source.length - j] && pattern[pattern.length - j] !== '?') {
+        return false;
+      }
+    }
+    return true;
+  }
+</script>

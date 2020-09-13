@@ -1,0 +1,82 @@
+<div id="container">
+  文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+  文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+  文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+  文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+  文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+  文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+  文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+  文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+  文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+  文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+  文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+</div>
+
+<div id="dragable"></div>
+
+<script>
+  const dragable = document.getElementById('dragable');
+
+  let baseX = 0;
+  let baseY = 0;
+
+  dragable.addEventListener('mousedown', event => {
+    // 鼠标点下的坐标
+    let startX = event.clientX;
+    let startY = event.clientY;
+    
+    // 偏移的距离 = 鼠标坐标 - 点下的坐标
+    const move = event => {
+      const range = getNearest(event.clientX, event.clientY);
+      range.insertNode(dragable);
+      // dragable.style.transform = `translate(${event.clientX - startX + baseX}px, ${event.clientY - startY + baseY}px)`;
+    };
+
+    const up = event => {
+      baseX = baseX + event.clientX - startX;
+      baseY = baseY + event.clientY - startY;
+      document.removeEventListener('mousemove', move);
+      document.removeEventListener('mouseup', up);
+    };
+    document.addEventListener('mousemove', move);
+    document.addEventListener('mouseup', up);
+  });
+
+  const conatainer = document.getElementById('conatainer');
+
+  const ranges = [];
+  // 这里是否能用container.innerText？
+  for (let i = 0; i < container.childNodes[0].textContent.length; i++) {
+    const range = document.createRange();
+    range.setStart(container.childNodes[0], i);
+    range.setEnd(container.childNodes[0], i);
+    ranges.push(range);
+  }
+
+  function getNearest(x, y) {
+    let min = Infinity;
+    let nearest = null;
+    for (const range of ranges) {
+      const rect = range.getBoundingClientRect();
+      const distance = Math.pow(rect.x - x, 2) + Math.pow(rect.y - y, 2);
+      if (distance < min) {
+        min = distance;
+        nearest = range;
+      }
+    }
+    return nearest;
+  }
+
+  document.addEventListener('selectstart', event => event.preventDefault());
+</script>
+<style>
+  body {
+    margin: 0;
+  }
+  #dragable {
+    display: inline-block;
+    width: 100px;
+    height: 100px;
+    background: blue;
+  }
+</style>
