@@ -1,0 +1,1 @@
+:first-line针对排版之后的fisrt-line，即在布局计算、元素渲染后才知道first-line的内容，才进行first-line样式的渲染。而修改float之类的属性会改变布局，布局改变后会重新渲染first-line，会造成死循环？
