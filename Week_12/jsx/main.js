@@ -15,7 +15,7 @@ class Carousel extends Component {
     for (let record of this.attributes.src) {
       let child = document.createElement('div');
       child.style.backgroundImage = `url(${record})`;
-      child.style.display = 'none';
+      // child.style.display = 'none';
       this.root.appendChild(child);
     }
     let position = 0;
@@ -23,8 +23,8 @@ class Carousel extends Component {
     // 增加鼠标事件
     this.root.addEventListener('mousedown', (event) => {
       console.log('mousedown');
-      let startX = event.clientX,
-        startY = event.clientY; // 相对于浏览器渲染区域的坐标
+      let startX = event.clientX;
+        // startY = event.clientY; // 相对于浏览器渲染区域的坐标
 
       let move = (event) => {
         let children = this.root.children;
@@ -38,21 +38,22 @@ class Carousel extends Component {
           pos = (pos + children.length) % children.length;
           let child = children[pos];
           child.style.transition = 'none';
-          clild.style.transform = `translateX(${
+          child.style.transform = `translateX(${
             -pos * 500 + offset * 500 + (x % 500)
           }px)`; // 从第二张开始的translate
         }
         // for (let child of children) {
         //   child.style.transition = 'none';
-        //   clild.style.transform = `translateX(${-position * 500 + x}px)`; // 从第二张开始的translate
+        //   child.style.transform = `translateX(${-position * 500 + x}px)`; // 从第二张开始的translate
         // }
       };
       let up = (event) => {
+        let children = this.root.children;
         let x = event.clientX - startX;
         position = position - Math.round(x / 500); // 拖够了一半就显示后一个位置，否则为前一个位置
         // for (let child of children) {
         //   child.style.transition = '';
-        //   clild.style.transform = `translateX(${-position * 500}px)`;
+        //   child.style.transform = `translateX(${-position * 500}px)`;
         // }
         for (let offset of [
           0,
@@ -62,7 +63,7 @@ class Carousel extends Component {
           pos = (pos + children.length) % children.length;
           let child = children[pos];
           child.style.transition = '';
-          clild.style.transform = `translateX(${-pos * 500 + offset * 500}px)`; // 从第二张开始的translate
+          child.style.transform = `translateX(${-pos * 500 + offset * 500}px)`; // 从第二张开始的translate
         }
         document.removeEventListener('mousemove', move);
         document.removeEventListener('mouseup', up);
