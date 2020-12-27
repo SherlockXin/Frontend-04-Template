@@ -160,10 +160,7 @@ function afterAttributeName(c) {
     // return data;
   } else {
     currentToken[currentAttribute.name] = currentAttribute.value;
-    currentAttribute = {
-      name: '',
-      value: '',
-    };
+    currentAttribute = { name: '', value: '' };
     return attributeName(c);
   }
 }
